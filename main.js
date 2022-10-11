@@ -108,9 +108,9 @@ const app = {
         }
     ],
     render: function() {
-        const html = this.songs.map(function(song) {
+        const html = this.songs.map((song, index) => {
             return `
-            <div class="song">
+            <div class="song ${index === this.currentIndex ? 'active' : ''}" data-index="${index}">
             <div class="thumb" style="background-image: url('${song.image}')">
             </div>
             <div class="body">
@@ -196,9 +196,12 @@ const app = {
             if(_this.isRandom) {
                 _this.randomSong()
                 audio.play()
+                _this.render()
             } else{
                 _this.nextSong()
                 audio.play()
+                _this.render()
+                _this.scrollToActiveSong()
             }
         }
         //prev song
@@ -206,9 +209,13 @@ const app = {
             if(_this.isRandom) {
                 _this.randomSong()
                 audio.play()
+                _this.render()
             } else{
                 _this.prevSong()
                 audio.play()
+                _this.render()
+                _this.scrollToActiveSong()
+
             }
         }
         //random song
@@ -229,7 +236,17 @@ const app = {
                 nextBtn.click()
             }
         }
-
+        playlist.onclick = function(e) {
+            const songNode = e.target.closest('.song:not(.active)')
+            if(songNode || e.target.closest('.option')) {
+                if(songNode) {
+                    _this.currentIndex = Number(songNode.dataset.index)
+                    _this.loadCurrentSong()
+                    audio.play()
+                    _this.render()
+                }
+            }
+        }
     },
     repeatSong: function() {
         audio.play()
@@ -264,6 +281,12 @@ const app = {
         cdThumb.style.backgroundImage = `url('${this.currentSong.image}')`
         audio.src = this.currentSong.path
     },
+    scrollToActiveSong: function() {
+        $('.song.active').scrollIntoView({
+            behavior : 'smooth',
+            block: 'nearest'
+        })
+    },
     start: function() {
         this.defineProperties()
         this.loadCurrentSong()
@@ -274,8 +297,3 @@ const app = {
     
 }
 app.start()
-
-const a = {"name": "sơn", "last name": "đặng \'ngọc\'", "age" : 18}
-const obj = JSON.stringify(a)
-
-console.log(obj)
